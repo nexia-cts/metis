@@ -1,9 +1,7 @@
 package com.combatreforged.factory.builder.mixin.server.level;
 
 import com.combatreforged.factory.api.event.entity.LivingEntityDeathEvent;
-import com.combatreforged.factory.api.event.player.PlayerCloseContainerEvent;
 import com.combatreforged.factory.api.event.player.PlayerDeathEvent;
-import com.combatreforged.factory.api.event.player.PlayerOpenContainerEvent;
 import com.combatreforged.factory.api.world.damage.DamageData;
 import com.combatreforged.factory.api.world.entity.player.Player;
 import com.combatreforged.factory.api.world.scoreboard.ScoreboardTeam;
@@ -14,7 +12,6 @@ import com.combatreforged.factory.builder.implementation.Wrapped;
 import com.combatreforged.factory.builder.implementation.util.ObjectMappings;
 import com.combatreforged.factory.builder.implementation.world.damage.WrappedDamageData;
 import com.combatreforged.factory.builder.implementation.world.entity.player.WrappedPlayer;
-import com.combatreforged.factory.builder.implementation.world.item.container.menu.WrappedContainerMenu;
 import com.combatreforged.factory.builder.implementation.world.scoreboard.WrappedScoreboardTeam;
 import com.combatreforged.factory.builder.mixin.server.players.PlayerListAccessor;
 import com.google.common.collect.ImmutableList;
@@ -30,11 +27,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.Objective;
@@ -50,12 +45,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -63,7 +56,6 @@ import java.util.stream.Collectors;
 public abstract class ServerPlayerMixin extends net.minecraft.world.entity.player.Player implements ServerPlayerExtension, LivingEntityExtension {
     @Shadow public ServerGamePacketListenerImpl connection;
     @Shadow @Final public MinecraftServer server;
-    @Shadow private int containerCounter;
     private ServerScoreboard scoreboard;
 
     @Unique private Inventory prevInventory;

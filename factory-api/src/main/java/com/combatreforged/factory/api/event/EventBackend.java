@@ -73,6 +73,7 @@ public class EventBackend<T extends Event> {
     }
 
     public void invokeEndFunctions(T event) {
+        if(event == null || event.getAfterEventFunctions() == null) { return; }
         for (Runnable runnable : event.getAfterEventFunctions()) {
             try {
                 runnable.run();

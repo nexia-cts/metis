@@ -7,16 +7,14 @@ plugins {
 	id 'java-library'
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
 def minecraftVersion = "1.16_combat-6"
+def fabricLoaderVersion = "0.14.21"
 
-archivesBaseName = "metis-builder"
 version = "${rootProject.version}-${minecraftVersion}"
 group = parent.group
 
-repositories {
+base {
+	archivesName = "metis-builder";
 }
 
 configurations {
@@ -27,7 +25,7 @@ configurations {
 dependencies {
 	minecraft "com.mojang:minecraft:${minecraftVersion}"
 	mappings loom.officialMojangMappings()
-	modImplementation "net.fabricmc:fabric-loader:0.12.12"
+	modImplementation "net.fabricmc:fabric-loader:${fabricLoaderVersion}"
 
 	api project(":metis-api")
 	include project(":metis-api")
@@ -38,9 +36,10 @@ dependencies {
 }
 
 loom {
+	accessWidenerPath = file("src/main/resources/metisbuilder.accesswidener")
+
 	customMinecraftManifest = "https://gist.githubusercontent.com/rizecookey/4c6142baaccc3875f9b227fe22f2ace5/raw/c8ed74b19f7a5315813c9d4b199798b692a8f359/1.16_combat-6.json"
 	intermediaryUrl = "https://maven.combatreforged.com/net/fabricmc/intermediary/%1\$s/intermediary-%1\$s-v2.jar"
-	accessWidenerPath = file("src/main/resources/metisbuilder.accesswidener")
 }
 
 processResources {
@@ -51,21 +50,24 @@ processResources {
 	}
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
 }
 
 java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+
 	withSourcesJar()
 }
 
 jar {
 	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}"}
+		rename { "${it}_${archiveBaseName}"}
 	}
 }
 
-task fullJar(type: RemapJarTask) {
+tasks.register('fullJar', RemapJarTask) {
 	dependsOn jar
 	archiveClassifier = "full"
 	input = jar {

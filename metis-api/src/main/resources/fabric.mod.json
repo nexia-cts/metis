@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "id": "metis-api",
+  "name": "Metis API",
+  "authors": ["rizecookey"],
+  "version": "${version}"
+}

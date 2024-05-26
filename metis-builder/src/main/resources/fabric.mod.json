@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "metis-builder",
+  "version": "${version}",
+
+  "name": "Metis Builder",
+  "description": "Implementation of the Metis API.",
+  "authors": [
+    "rizecookey"
+  ],
+  "contact": {
+    "homepage": "https://combatreforged.com/factory",
+    "sources": "https://github.com/CombatReforged/factory"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/metisbuilder/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.combatreforged.metis.builder.MetisBuilder"
+    ],
+    "preLaunch": [
+      "com.combatreforged.metis.builder.prelaunch.MetisBuilderPreLaunch"
+    ]
+  },
+  "mixins": [
+    "metisbuilder.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "minecraft": [
+      "1.16.x",
+      "1.16.3-combat.8.c"
+    ],
+    "factory-api": "*"
+  },
+  "suggests": {
+  },
+  "accessWidener": "metisbuilder.accesswidener"
+}

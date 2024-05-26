@@ -9,6 +9,6 @@ pluginManagement {
     }
 }
 
-include ":factory-api"
-include ":factory-builder"
+include ":metis-api"
+include ":metis-builder"
 

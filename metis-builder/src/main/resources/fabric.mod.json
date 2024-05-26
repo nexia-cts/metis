@@ -35,7 +35,7 @@
       "1.16.x",
       "1.16.3-combat.8.c"
     ],
-    "factory-api": "*"
+    "metis-api": "*"
   },
   "suggests": {
   },

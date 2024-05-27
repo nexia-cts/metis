@@ -103,7 +103,7 @@ public abstract class ServerPlayerMixin extends net.minecraft.world.entity.playe
         this.keepInv = ext.isKeepInv();
         this.scoreboard = ext.getScoreboard();
         this.hiddenInTabList.clear();
-        this.hiddenInTabList.addAll(ext.getHiddenInTabList().stream().map(Entity::getUUID).collect(Collectors.toList()));
+        this.hiddenInTabList.addAll(ext.getHiddenInTabList().stream().map(Entity::getUUID).toList());
 
         if (this.deathEventHappened) {
             this.prevInventory = this.inventory;

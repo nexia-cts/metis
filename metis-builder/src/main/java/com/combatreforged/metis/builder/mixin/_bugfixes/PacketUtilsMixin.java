@@ -34,7 +34,7 @@ public class PacketUtilsMixin {
                 if (packetListener.getConnection().isConnected()) {
                     packet.handle(packetListener);
                 } else {
-                    LOGGER.debug("Ignoring packet due to disconnection: " + packet);
+                    LOGGER.debug("Ignoring packet due to disconnection: {}", packet);
                 }
 
             });
@@ -47,6 +47,7 @@ public class PacketUtilsMixin {
         // end change
     }
 
+    @Unique
     private static MinecraftServer getServer() {
         return SERVER == null ? (SERVER = ((WrappedMetisServer) MetisAPI.getInstance().getServer()).unwrap()) : SERVER;
     }

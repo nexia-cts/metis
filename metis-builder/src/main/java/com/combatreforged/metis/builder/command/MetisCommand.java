@@ -18,16 +18,16 @@ public final class MetisCommand {
 
     public static void register(CommandDispatcher<CommandSourceInfo> dispatcher) {
         dispatcher.register(
-                literal("factory")
+                literal("metis")
                         .requires(info -> info.getSender().getPermissionLevel() >= 4)
                         .then(literal("version")
                                 .executes(context -> {
                                     FabricLoader loader = FabricLoader.getInstance();
-                                    assert loader.getModContainer("factory-api").isPresent() && loader.getModContainer("factory-builder").isPresent();
-                                    String apiVersion = loader.getModContainer("factory-api").get().getMetadata().getVersion().toString();
-                                    String builderVersion = loader.getModContainer("factory-builder").get().getMetadata().getVersion().toString();
-                                    context.getSource().sendMessage(Component.text("Factory version: \n ")
-                                            .append(Component.text("- API: [factory-api@" + apiVersion + "]\n - Implementation: [factory-builder@" + builderVersion + "]")
+                                    assert loader.getModContainer("metis-api").isPresent() && loader.getModContainer("metis-builder").isPresent();
+                                    String apiVersion = loader.getModContainer("metis-api").get().getMetadata().getVersion().toString();
+                                    String builderVersion = loader.getModContainer("metis-builder").get().getMetadata().getVersion().toString();
+                                    context.getSource().sendMessage(Component.text("metis version: \n ")
+                                            .append(Component.text("- API: [metis-api@" + apiVersion + "]\n - Implementation: [metis-builder@" + builderVersion + "]")
                                                     .color(NamedTextColor.DARK_GREEN)));
                                     return 0;
                                 }))
@@ -36,9 +36,9 @@ public final class MetisCommand {
                                     List<ModMetadata> plugins = FabricLoader.getInstance().getAllMods()
                                             .stream()
                                             .map(ModContainer::getMetadata)
-                                            .filter(metadata -> metadata.getDepends().stream()
-                                                    .anyMatch(dep -> dep.getModId().equals("factory-api")))
-                                            .collect(Collectors.toList());
+                                            .filter(metadata -> metadata.getDependencies().stream()
+                                                    .anyMatch(dep -> dep.getModId().equals("metis-api")))
+                                            .toList();
                                     Component result = Component.text("Found " + plugins.size() + " plugin(s): ");
                                     for (ModMetadata plugin : plugins) {
                                         result = result.append(Component.text("[" + plugin.getId() + "@" + plugin.getVersion().toString() + "]"));

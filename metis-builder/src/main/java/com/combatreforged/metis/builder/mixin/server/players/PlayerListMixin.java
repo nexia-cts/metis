@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.server.MinecraftServer;
@@ -30,21 +31,16 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import java.util.UUID;
 
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin {
-    @Shadow public abstract void broadcastMessage(Component component, ChatType chatType, UUID uUID);
-
-    @Shadow public abstract void broadcastAll(Packet<?> packet);
 
     @Shadow @Final private MinecraftServer server;
     /**
@@ -67,28 +63,54 @@ public abstract class PlayerListMixin {
         PlayerData.removePlayerData(serverPlayer);
     }
     // BEGIN : CHAT EVENT
+    /*
     @Inject(at = @At("HEAD"), method = "broadcastMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V", cancellable = true)
     public void callBroadcastMessageEvent(Component component, ChatType chatType, UUID uUID, CallbackInfo ci) {
+    }
+
+     */
+    // END : CHAT EVENT
+
+    // BEGIN: JOIN EVENT
+
+    @ModifyArgs(method = "broadcastMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ClientboundChatPacket;<init>(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V"))
+    private void handleChat(Args args) {
         MinecraftServer server = ((PlayerListAccessor) this).getServer();
+
+        Component component = args.get(0);
+        String key = ((TranslatableComponent) component).getKey();
+        ChatType chatType = args.get(1);
 
         ServerBroadcastMessageEvent broadcastMessageEvent = new ServerBroadcastMessageEvent(Wrapped.wrap(server, WrappedMetisServer.class), ObjectMappings.convertComponent(component), ObjectMappings.convertChatType(chatType));
         ServerBroadcastMessageEvent.BACKEND.invoke(broadcastMessageEvent);
 
         if (!broadcastMessageEvent.isCancelled() && broadcastMessageEvent.getMessage() != null) {
-            this.server.sendMessage(ObjectMappings.convertComponent(broadcastMessageEvent.getMessage()), uUID);
-            this.broadcastAll(new ClientboundChatPacket(ObjectMappings.convertComponent(broadcastMessageEvent.getMessage()), chatType, uUID));
+            args.set(0, ObjectMappings.convertComponent(broadcastMessageEvent.getMessage()));
+            return;
         }
 
-        ci.cancel();
-    }
-    // END : CHAT EVENT
+        if (key.contains("multiplayer.player.left")) {
+        }
 
-    // BEGIN: JOIN EVENT
-    Component joinMessage;
+        System.out.println("heya " + this.joinEvent.getJoinMessage() == null);
+        System.out.println(key);
+        if (key.contains("multiplayer.player.join") && this.joinEvent.getJoinMessage() != null) {
+            args.set(0, ObjectMappings.convertComponent(joinEvent.getJoinMessage()));
+            System.out.println("giggity giggity");
+        }
+    }
+
+    @Unique Component joinMessage = null;
+    @Unique PlayerJoinEvent joinEvent;
+
+    /*
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V", ordinal = 0))
     public void catchJoinMessage(PlayerList playerList, Component component, ChatType chatType, UUID uUID) {
         joinMessage = component;
+        playerList.broadcastMessage(component, ChatType.SYSTEM, Util.NIL_UUID);
     }
+
+     */
 
     @Inject(method = "placeNewPlayer", at = @At("TAIL"))
     public void callPlayerJoinEvent(Connection connection, ServerPlayer serverPlayer, CallbackInfo ci) {
@@ -96,9 +118,7 @@ public abstract class PlayerListMixin {
                 ObjectMappings.convertComponent(joinMessage));
         PlayerJoinEvent.BACKEND.invoke(joinEvent);
 
-        if (joinEvent.getJoinMessage() != null) {
-            this.broadcastMessage(ObjectMappings.convertComponent(joinEvent.getJoinMessage()), ChatType.SYSTEM, Util.NIL_UUID);
-        }
+        this.joinEvent = joinEvent;
 
         PlayerJoinEvent.BACKEND.invokeEndFunctions(joinEvent);
     }
